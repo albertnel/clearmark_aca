@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Mass Assign To Course</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+		<link href="lib/flexigrid-1.1/css/flexigrid.css" rel="stylesheet" type="text/css" >
+
+		<script type="text/javascript" src="lib/jquery/jquery-1.6.3.min.js"></script>
+		<script type="text/javascript" src="lib/flexigrid-1.1/js/flexigrid.js"></script>
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function assignStudents()
+		{
+			ID("assign_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Assigning, please wait...</span>';
+
+			var grid;
+			var list = document.getElementsByTagName("div");
+			for(a=0;a<list.length;a++)
+			{
+				if(list[a].class == 'flexigrid')
+				{
+					grid = list[a];
+					break;
+				}
+			}
+
+			// -- Get course --
+			var course_id = ID("course_id").value;
+			if (course_id == 0)
+			{
+				ID("assign_msg").innerHTML = '<span class="form_input_err">Please select a course.</span>';
+				return;
+			}
+
+			// -- Collect user_ids --
+			var student_ids = "";
+			$('.trSelected', grid).each(function() {
+				var id = $(this).attr('id');
+				student_ids += id.substring(id.lastIndexOf('row')+3)+",";
+			});
+			student_ids = student_ids.substring(0, student_ids.length-1);
+
+			if (student_ids == "")
+			{
+				ID("assign_msg").innerHTML = '<span class="form_input_err">Please select at least one student.</span>';
+				return;
+			}
+
+			ajaxAssignUsersToCourse(student_ids, course_id, {'onUpdate':finalizeAssignment});
+		}
+
+		function finalizeAssignment()
+		{
+			ID("assign_msg").innerHTML = '<span class="text_normal">Assignment successful.</span>';
+		}
+
+	</script>
+
+	<body>
+
+		<input type="hidden" id="selected_level" value="0" />
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<div class="text_normal" style="margin-bottom:10px;"><span class="bold">Step 1.</span> Select the course.</div>
+				<div id="courses_dd"></div>
+
+				<div class="text_normal" style="margin:20px 0px 10px 0px;"><span class="bold">Step 2.</span> Select the student(s).</div>
+				<table class="students_datagrid" style="display: none"></table>
+
+				<div style="margin:20px 0px 10px 0px;">
+					<div class="float_left"><input type="button" value="Assign" onclick="assignStudents();" /></div>
+					<div id="assign_msg" class="float_left" style="margin:5px 0px 0px 10px;">&nbsp;</div>
+					<div class="clear_both"></div>
+				</div>
+
+				<div><a href="students.php">&laquo; Back</a></div>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<script>
+
+			$(".students_datagrid").flexigrid({
+				url : 'students_xml.php',
+				dataType: 'xml',
+				colModel : [ {display: 'Student Number', name: 'username', width: 150, sortable: true, align: 'left'},
+								 {display: 'First Name', name: 'name', width: 150, sortable: true, align: 'left'},
+								 {display: 'Last Name', name: 'surname', width: 150, sortable: true, align: 'left'},
+								 {display: 'Email', name: 'email', width: 150, sortable: true, align: 'left'}
+				],
+				searchitems : [ {
+						  display : 'Student Number',
+						  name : 'username',
+						  isdefault : true
+				}, {
+						  display : 'First Name',
+						  name : 'name'
+				}, {
+						  display : 'Last Name',
+						  name : 'surname'
+				}],
+				sortname : "username",
+				sortorder : "asc",
+				usepager : true,
+				title : 'Students',
+				useRp : true,
+				rp : 15,
+				showTableToggleBtn : true,
+				width : 750,
+				height : 300
+			});
+
+		</script>
+
+	</body>
+
+</html>

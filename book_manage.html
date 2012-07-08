@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Book Management</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+		<script type="text/javascript" src="lib/jquery/jquery-1.6.3.min.js"></script>
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function addChapter(file_path)
+		{
+			var chapter_count = ID("chapter_count").value;
+			chapter_count++;
+			ID("chapter_count").value = chapter_count;
+
+			var wrapper = ID("chapters_wrapper");
+			var new_div = document.createElement("div");
+			new_div.setAttribute("id", "chapter"+chapter_count+"_wrapper");
+
+			var innerhtml = '<div class="form_label float_left">Chapter '+chapter_count+':</div><div class="form_input float_left"><input type="file" id="file'+chapter_count+'" name="file'+chapter_count+'" class="textbox" />';
+			if (file_path == "")
+				innerhtml += '<img src="template/img/close.gif" class="remove_chapter_icon" title="Remove" onclick="removeChapter('+chapter_count+');" /><div id="file'+chapter_count+'_desc"><span class="form_input_desc">Chapter '+chapter_count+' file.</span></div></div><div class="clear_both"></div>';
+			else
+				innerhtml += '<a href="'+file_path+'" style="margin-left:10px;" target="_blank">View file</a><img src="template/img/close.gif" class="remove_chapter_icon" title="Remove" onclick="removeChapter('+chapter_count+');" /><div id="file'+chapter_count+'_desc"><span class="form_input_desc">Chapter '+chapter_count+' file.</span></div></div><div class="clear_both"></div>';
+			new_div.innerHTML = innerhtml;
+
+			wrapper.appendChild(new_div);
+		}
+
+		function removeChapter(chapter_remove)
+		{
+			var chapter_count = ID("chapter_count").value;
+
+			if (chapter_remove != chapter_count)
+				ID("file"+chapter_remove+"_desc").innerHTML = '<span class="form_input_err">Remove from the last chapter.</span>';
+			else
+			{
+				ID("chapter_count").value = chapter_count-1;
+
+				var wrapper = ID("chapters_wrapper");
+				wrapper.removeChild(ID("chapter"+chapter_remove+"_wrapper"));
+
+				// -- Check if chapter has been previously saved to remove file and DB entry as well --
+				var book_id = ID("book_id").value;
+				if (book_id != "") ajaxRemoveChapter(book_id, chapter_count, {});
+			}
+		}
+
+		function saveBook()
+		{
+			ID("submit_msg").style.visibility = "visible";
+			var err = false;
+			var book_id = ID("book_id").value;
+
+			var book_title = ID("book_title").value;
+			if (book_title == "")
+			{
+				err = true;
+				ID("book_title_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("book_title_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var book_code = ID("book_code").value;
+			if (book_code == "")
+			{
+				err = true;
+				ID("book_code_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("book_code_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var file_index = ID("file_index").value;
+			if ((file_index == "") && (book_id == ""))
+			{
+				err = true;
+				ID("file_index_desc").innerHTML = '<span class="form_input_err">Required file.</span>';
+			}
+			else
+				ID("file_index_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var chapter_count = ID("chapter_count").value - 0;
+			var chapter_already_count = ID("chapter_already_count").value - 0;
+			for (var k = (chapter_already_count+1); k <= chapter_count; ++k)
+			{
+				var chapter_file = ID("file"+k).value;
+				if (chapter_file == "")
+				{
+					err = true;
+					ID("file"+k+"_desc").innerHTML = '<span class="form_input_err">Required file.</span>';
+				}
+				else
+					ID("file"+k+"_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+			}
+
+			if (!err) ID("book_form").submit();
+			else ID("submit_msg").style.visibility = "hidden";
+		}
+
+		function backPage()
+		{
+			var subject_id = ID("subject_id").value;
+			window.location = "subject_manage.php?"+subject_id;
+		}
+
+		$('book_form').submit(function(){
+			 $('input:file[value=""]').attr('disabled', true);
+		});
+
+	</script>
+
+	<body>
+
+		<input type="hidden" id="chapter_files" />
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<form id="book_form" method="post" action="book_manage.php" enctype="multipart/form-data">
+
+					<input type="hidden" id="subject_id" name="subject_id" />
+					<input type="hidden" id="book_id" name="book_id" />
+					<input type="hidden" id="chapter_count" value="0" />
+					<input type="hidden" id="chapter_already_count" value="0" />
+
+					<h2>Book Details</h2>
+
+					<div class="form_label float_left">Title:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="book_title" name="book_title" class="textbox" />
+						<div id="book_title_desc"><span class="form_input_desc">Title of the book.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Code:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="book_code" name="book_code" class="textbox" />
+						<div id="book_code_desc"><span class="form_input_desc">Code of the book.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_input_divider"></div>
+
+					<h2 style="margin-top:20px;">Book Chapters</h2>
+
+					<div class="form_label float_left">Index:</div>
+					<div class="form_input float_left">
+						<input type="file" id="file_index" name="file_index" class="textbox" />
+						<span id="index_file" style="margin-left:10px;"></span>
+						<div id="file_index_desc"><span class="form_input_desc">Index of book chapters.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div id="chapters_wrapper"></div>
+					<div><a onclick="addChapter();">Add chapter</a></div>
+
+					<div class="form_input_divider" style="margin:20px 0px;"></div>
+
+					<div class="form_submit">
+						<input id="submit_button" type="button" value="Save Book" onclick="saveBook();" />
+						<span id="submit_msg" class="submit_msg">Saving book... <img src="template/img/ajax/loader.gif" /></span>
+					</div>
+
+					<div><a onclick="backPage();">&laquo; Back</a></div>
+
+				</form>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<span id="end_script"></span>
+
+		<script>
+
+			// -- Check if chapter_count > 0, if so add the chapter fields --
+			var chapter_count = ID("chapter_count").value;
+			if (chapter_count > 0)
+			{
+				var chapter_files = ID("chapter_files").value.split(",");
+
+				ID("chapter_count").value = 0;
+				for (var k = 0; k < chapter_count; ++k)
+				{
+					addChapter(chapter_files[k]);
+					ID("file"+(k+1)+"_desc").innerHTML = '<span class="form_input_desc">Chapter uploaded.</span>';
+				}
+			}
+
+		</script>
+
+	</body>
+
+</html>

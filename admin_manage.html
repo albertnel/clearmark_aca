@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Administrator Management</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function validateEmail()
+		{
+			ID("submit_msg").innerHTML = 'Saving... <img src="template/img/ajax/loader.gif" />';
+			ID("submit_msg").style.visibility = "visible";
+
+			var email = ID("email").value;
+			ajaxValidateEmail(email, {'target':'email_valid', 'onUpdate':saveAdmin});
+		}
+
+		function saveAdmin()
+		{
+			var err = false;
+			var user_id = ID("user_id").value;
+
+			var username = ID("username").value;
+			if (username == "")
+			{
+				err = true;
+				ID("username_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("username_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var password = ID("password").value;
+			if ((password == "") && (user_id == ""))
+			{
+				err = true;
+				ID("password_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("password_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var name = ID("name").value;
+			if (name == "")
+			{
+				err = true;
+				ID("name_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("name_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var surname = ID("surname").value;
+			if (surname == "")
+			{
+				err = true;
+				ID("surname_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("surname_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			var email = ID("email").value;
+			if (email == "")
+			{
+				err = true;
+				ID("email_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+			{
+				var email_valid = ID("email_valid").value;
+				if (email_valid == 0)
+				{
+					err = true;
+					ID("email_desc").innerHTML = '<span class="form_input_err">Invalid email format.</span>';
+				}
+				else
+					ID("email_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+			}
+
+			if (!err) ID("admin_form").submit();
+			else ID("submit_msg").innerHTML = "";
+		}
+
+		function removeCourse()
+		{
+			ID("submit_msg").innerHTML = '&nbsp;';
+			ID("submit_msg").style.visibility = "visible";
+
+			var course_id = ID("course_id").value;
+			if (course_id == "")
+			{
+				ID("submit_msg").innerHTML = '<span class="form_input_err">Please select a course.</span>';
+			}
+
+			if (confirm("Are you sure you want to remove the user from selected course?"))
+			{
+				ID("submit_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Removing, please wait...</span>';
+
+				var user_id = ID("user_id").value;
+				var course_id = ID("course_id").value;
+				ajaxRemoveUserFromCourse(user_id, course_id, {'onUpdate':reloadCourses});
+			}
+		}
+
+		function reloadCourses()
+		{
+			ID("submit_msg").style.visibility = "hidden";
+			var user_id = ID("user_id").value;
+			ajaxGetAssignedCoursesDD(user_id, {'target':'courses_dd'});
+		}
+
+		function removeSubject()
+		{
+			ID("submit_msg").innerHTML = '&nbsp;';
+			ID("submit_msg").style.visibility = "visible";
+
+			var subject_id = ID("subject_id").value;
+			if (subject_id == "")
+			{
+				ID("submit_msg").innerHTML = '<span class="form_input_err">Please select a subject.</span>';
+			}
+
+			if (confirm("Are you sure you want to remove the user from selected subject?"))
+			{
+				ID("submit_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Removing, please wait...</span>';
+
+				var user_id = ID("user_id").value;
+				var subject_id = ID("subject_id").value;
+				ajaxRemoveUserFromSubject(user_id, subject_id, {'onUpdate':reloadSubjects});
+			}
+		}
+
+		function reloadSubjects()
+		{
+			ID("submit_msg").style.visibility = "hidden";
+			var user_id = ID("user_id").value;
+			ajaxGetAssignedSubjectsDD(user_id, {'target':'subjects_dd'});
+		}
+
+	</script>
+
+	<body>
+
+		<div id="ajax"></div>
+
+		<input type="hidden" id="email_valid" value="0" />
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<form id="admin_form" method="POST" action="admin_manage.php">
+
+					<input type="hidden" id="profile_id" name="profile_id" />
+					<input type="hidden" id="user_id" name="user_id" />
+
+					<div class="form_label float_left">Username:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="username" name="username" class="textbox" />
+						<div id="username_desc"><span class="form_input_desc">The account username (employee number).</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Password:</div>
+					<div class="form_input float_left">
+						<input type="password" id="password" name="password" class="textbox" />
+						<div id="password_desc"><span class="form_input_desc">The account password.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">User type:</div>
+					<div class="form_input float_left">
+						<div id="user_type_dd"></div>
+						<div id="password_desc"><span class="form_input_desc">The account type.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">First name:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="name" name="name" class="textbox" />
+						<div id="name_desc"><span class="form_input_desc">First name.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Last name:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="surname" name="surname" class="textbox" />
+						<div id="surname_desc"><span class="form_input_desc">Last name.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Email:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="email" name="email" class="textbox" />
+						<div id="email_desc"><span class="form_input_desc">Example: name@domain.com.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Office:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="office" name="office" class="textbox" />
+						<div id="office_desc"><span class="form_input_desc">Office room number for consultations.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Courses:</div>
+					<div class="form_input float_left" id="courses_dd"></div>
+					<div class="clear_both"></div>
+
+					<div class="form_label float_left">Subjects:</div>
+					<div class="form_input float_left" id="subjects_dd"></div>
+					<div class="clear_both"></div>
+
+					<div class="form_submit">
+						<input id="submit_button" type="button" value="Save Admin" onclick="validateEmail();" />
+						<span id="submit_msg" class="submit_msg"></span>
+					</div>
+
+					<div><a href="admins.php">&laquo; Back</a></div>
+
+				</form>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<span id="end_script"></span>
+
+	</body>
+
+</html>

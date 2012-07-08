@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Conversation</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function sendMessage()
+		{
+			var conversation_id = ID("conversation_id").value;
+
+			var message = ID("message").value;
+			if (message == "")
+			{
+				ID("message_desc").innerHTML = '<span class="form_input_err">Please enter the message.</span>';
+				return;
+			}
+
+			// -- New conversation --
+			if (conversation_id == "")
+			{
+				var subject = ID("subject").value;
+				if (subject == "")
+				{
+					if (!confirm("Send this message without a subject?"))
+						return;
+				}
+			}
+
+			ID("send_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Sending, please wait...</span>';
+			ID("message_form").submit();
+		}
+
+		function goBack()
+		{
+			window.location = ID("referer").value;
+		}
+
+	</script>
+
+	<body>
+
+		<input type="hidden" id="referer" />
+		<input type="hidden" id="view_thread_id" value="0" />
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<h2 id="subject_field"></h2>
+				<div id="threads_wrapper"></div>
+
+				<form id="message_form" action="message_view.php" method="POST">
+					<input type="hidden" id="conversation_id" name="conversation_id" />
+					<input type="hidden" id="user_id_to" name="user_id_to" />
+					<div id="new_message_wrapper"></div>
+				</form>
+
+				<div style="margin-top:20px;"><a onclick="goBack();">&laquo; Back</a></div>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<script>
+
+			var view_thread_id = ID("view_thread_id").value;
+			if (view_thread_id != 0) window.location = "#thread_wrapper_"+view_thread_id;
+
+		</script>
+
+	</body>
+
+</html>

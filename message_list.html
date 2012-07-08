@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Messages</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+		<link href="lib/flexigrid-1.1/css/flexigrid.css" rel="stylesheet" type="text/css" >
+
+		<script type="text/javascript" src="lib/jquery/jquery-1.6.3.min.js"></script>
+		<script type="text/javascript" src="lib/flexigrid-1.1/js/flexigrid.js"></script>
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function viewConversation(celDiv, id){
+			$(celDiv).click(
+				function() {
+					var ids = id.split(",");
+					window.location = "message_view.php?"+ids[0]+"+"+ids[1];
+		  		}
+			)
+		}
+
+		function goBack()
+		{
+			window.location = ID("referer").value;
+		}
+
+	</script>
+
+	<body>
+
+		<input type="hidden" id="referer" />
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<div id="message_datagrid"></div>
+
+				<div style="margin-top:20px;"><a onclick="goBack();">&laquo; Back</a></div>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<script>
+
+			$("#message_datagrid").flexigrid({
+				url : 'message_list_xml.php',
+				dataType: 'xml',
+				colModel : [ {display: 'Contact', name: 'other_user_name', width: 150, sortable: false, align: 'left', process: viewConversation},
+								 {display: 'Message', name: 'subject', width: 200, sortable: false, align: 'left', process: viewConversation},
+								 {display: 'Subject', name: 'subject_name', width: 180, sortable: false, align: 'left', process: viewConversation},
+								 {display: 'Date', name: 'thread_datetime', width: 120, sortable: false, align: 'left', process: viewConversation},
+								 {display: 'Status', name: 'status', width: 150, sortable: false, align: 'left', process: viewConversation}
+				],
+				searchitems : [ {
+						  display : 'Contact',
+						  name : 'other_user_name',
+						  isdefault : true
+				}, {
+						  display : 'Subject',
+						  name : 'subject'
+				}],
+				sortname : "thread_datetime",
+				sortorder : "desc",
+				usepager : true,
+				title : 'Messages',
+				useRp : true,
+				rp : 15,
+				showTableToggleBtn : true,
+				width : 850,
+				height : 300,
+				singleSelect : true
+			});
+
+		</script>
+
+	</body>
+
+</html>

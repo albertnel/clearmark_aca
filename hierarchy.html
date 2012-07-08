@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Hierarchy</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+		<link href="lib/jquery.placeholder/style.css" rel="stylesheet" >
+
+		<script type="text/javascript" src="lib/jquery/jquery-1.6.3.min.js"></script>
+		<script type="text/javascript" src="lib/jquery.placeholder/jquery.placeholder.js"></script>
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function selectItem(id)
+		{
+			if (id == -1)
+				selectNode(0);
+			else
+				selectNode(id);
+
+			ID("selected_level").value = id;
+		}
+
+		function addLevel()
+		{
+			ID("level_name").disabled = false;
+			ID("level_button").disabled = false;
+		}
+
+		function clearMessage()
+		{
+			ID("level_msg").innerHTML = '';
+		}
+
+		function editLevel()
+		{
+			var selected_level = ID("selected_level").value;
+			if (selected_level == 0)
+				ID("level_msg").innerHTML = '<span class="form_input_err">Please select a level to edit.</span>';
+			else
+			{
+				ajaxLevelGetName(selected_level, {'target':'level_name', 'onUpdate':clearMessage});
+				ID("level_id").value = selected_level;
+				ID("level_name").disabled = false;
+				ID("level_button").disabled = false;
+				ID("level_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Loading, please wait...</span>';
+			}
+		}
+
+		function removeLevel()
+		{
+			var selected_level = ID("selected_level").value;
+			if (selected_level == 0)
+				ID("level_msg").innerHTML = '<span class="form_input_err">Please select a level to remove.</span>';
+			else
+			{
+				if (confirm("Are you sure you want to remove this level?"))
+				{
+					prevChosen = "-1";
+					ID("level_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Removing, please wait...</span>';
+					ID("operation").value = "remove";
+					ajaxRemoveLevel(selected_level, {'target':'remove_result', 'onUpdate':operationFinish});
+				}
+			}
+		}
+
+		function saveLevelCheckName()
+		{
+			ID("level_msg").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Saving, please wait...</span>';
+
+			var level_name = document.getElementById('level_name').value;
+			if (level_name == "")
+				ID("level_msg").innerHTML = '<span class="form_input_err">Please enter the level name.</span>';
+			else
+			{
+				var level_id = ID("level_id").value;
+				ajaxLevelCheckName(level_id, level_name, {'target':'level_name_perm', 'onUpdate':saveLevel});
+			}
+		}
+
+		function saveLevel()
+		{
+			var level_name_perm = ID("level_name_perm").value;
+			if (level_name_perm == 1)
+			{
+				var level_id = ID("level_id").value;
+				var level_name = document.getElementById('level_name').value;
+				var selected_level = ID("selected_level").value;
+				ID("operation").value = "save";
+				ajaxSaveLevel(level_id, level_name, selected_level, {'target':'add_result', 'onUpdate':operationFinish});
+			}
+			else
+				ID("level_msg").innerHTML = '<span class="form_input_err">Level name already exists.</span>';
+		}
+
+		function operationFinish()
+		{
+			ajaxLevelTreeDraw({'target':'level_tree'});
+			ID("level_name").value = "";
+			ID("level_name").disabled = true;
+			ID("level_button").disabled = true;
+			ID("level_id").value = "";
+
+			var operation = ID("operation").value;
+			if (operation == "save")
+			{
+				var add_result = ID("add_result").value;
+				if (add_result == 1)
+					ID("level_msg").innerHTML = '<span class="text_normal">Level saved successfully.</span>';
+				else
+					ID("level_msg").innerHTML = '<span class="form_input_err">You don\'t have permission to add this level.</span>';
+			}
+			else if (operation == "remove")
+			{
+				ID("selected_level").value = 0;
+				var remove_result = ID("remove_result").value;
+				if (remove_result == 1)
+					ID("level_msg").innerHTML = '<span class="text_normal">Level removed successfully.</span>';
+				else
+					ID("level_msg").innerHTML = '<span class="form_input_err">You don\'t have permission to remove this level.</span>';
+			}
+		}
+
+		function checkKey(e)
+		{
+			var keyPressed = e.keyCode;
+			if (keyPressed == 13) saveLevelCheckName();
+		}
+
+	</script>
+
+	<body>
+
+		<input type="hidden" id="level_id" value="" />
+		<input type="hidden" id="level_name_perm" value="0" />
+		<input type="hidden" id="selected_level" value="0" />
+		<input type="hidden" id="operation" value="" />
+		<input type="hidden" id="add_result" value="" />
+		<input type="hidden" id="remove_result" value="" />
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<div id="level_tree"></div>
+
+				<div id="level_op_links"><a onclick="addLevel();">Add level</a> || <a onclick="editLevel();">Edit level</a> || <a onclick="removeLevel();">Remove level</a></div>
+				<div id="level_inputs">
+					<input type="text" id="level_name" value="" placeholder="Level name" onkeyup="checkKey(event);" disabled />
+					<input type="button" id="level_button" value="Save" onclick="saveLevelCheckName();" disabled />
+				</div>
+				<div id="level_msg">&nbsp;</div>
+
+				<div style="height:20px"></div>
+
+				<a href="index.php">&laquo; Back</a>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+	</body>
+
+</html>

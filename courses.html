@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Courses</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+		<link href="lib/flexigrid-1.1/css/flexigrid.css" rel="stylesheet" type="text/css" >
+
+		<script type="text/javascript" src="lib/jquery/jquery-1.6.3.min.js"></script>
+		<script type="text/javascript" src="lib/flexigrid-1.1/js/flexigrid.js"></script>
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function executeAction()
+		{
+			var action = ID("action_dd").value;
+			if (action == "add")
+				window.location = "course_manage.php";
+			else if (action == "mass_assign")
+				window.location = "courses_assign_level.php";
+		}
+
+		function deleteCourse(course_id)
+		{
+			if (confirm("Are you sure you want to delete this course?"))
+				ajaxCourseDelete(course_id, {'onUpdate':reloadGrid});
+		}
+
+		function reloadGrid()
+		{
+			$(".courses_datagrid").flexReload();
+		}
+
+	</script>
+
+	<body>
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<table class="courses_datagrid" style="display: none"></table>
+
+				<div class="action_div">
+					<span class="text_normal bold">Actions:</span>
+					<select id="action_dd">
+						<option value="add">Add course</option>
+						<option value="mass_assign">Mass-assign to level</option>
+					</select>
+					<input type="button" value="Go" onclick="executeAction();" />
+				</div>
+
+				<div><a href="panel_superadmin.php">&laquo; Back</a></div>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<script>
+
+			$(".courses_datagrid").flexigrid({
+				url : 'courses_xml.php',
+				dataType: 'xml',
+				colModel : [ {display: 'Course Name', name: 'course_name', width: 250, sortable: true, align: 'left'},
+								 {display: 'Faculty', name: 'level_name', width: 250, sortable: true, align: 'left'},
+								 {display: 'Actions', name: 'actions', width: 150, sortable: false, align: 'left'}
+				],
+				searchitems : [ {
+						  display : 'Course name',
+						  name : 'course_name',
+						  isdefault : true
+				},{
+						  display : 'Faculty',
+						  name : 'level_name'
+				}],
+				sortname : "course_name",
+				sortorder : "asc",
+				usepager : true,
+				title : 'Courses',
+				useRp : true,
+				rp : 15,
+				showTableToggleBtn : true,
+				height : 300,
+				singleSelect : true
+			});
+
+		</script>
+
+	</body>
+
+</html>

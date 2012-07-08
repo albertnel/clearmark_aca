@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+
+	<head>
+		<title>Course Management</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" >
+		<link href="lib/flexigrid-1.1/css/flexigrid.css" rel="stylesheet" type="text/css" >
+
+		<script type="text/javascript" src="lib/jquery/jquery-1.6.3.min.js"></script>
+		<script type="text/javascript" src="lib/flexigrid-1.1/js/flexigrid.js"></script>
+
+		<script type="text/javascript" src="lib/fancybox/jquery.mousewheel-3.0.4.pack.js"></script>
+		<script type="text/javascript" src="lib/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+		<link rel="stylesheet" type="text/css" href="lib/fancybox/jquery.fancybox-1.3.4.css" media="screen" />
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+
+				$("#events_link").fancybox({
+					'width'				: '90%',
+					'height'			: '90%',
+					'autoScale'			: false,
+					'transitionIn'		: 'elastic',
+					'transitionOut'		: 'elastic',
+					'type'				: 'iframe'
+				});
+
+			});
+		</script>
+
+	</head>
+
+	<script>
+
+		function ID(id)
+		{
+			return document.getElementById(id);
+		}
+
+		function saveCourse()
+		{
+			var err = false;
+
+			var course_name = ID("course_name").value;
+			if (course_name == "")
+			{
+				err = true;
+				ID("course_name_desc").innerHTML = '<span class="form_input_err">Required field cannot be left blank.</span>';
+			}
+			else
+				ID("course_name_desc").innerHTML = '<span class="form_input_desc">&nbsp;</span>';
+
+			if (!err)
+			{
+				ID("submit_msg").innerHTML = 'Saving... <img src="template/img/ajax/loader.gif" />';
+				ID("submit_msg").style.visibility = "visible";
+				ID("course_form").submit();
+			}
+			else ID("submit_msg").innerHTML = "";
+		}
+
+		function deleteNotification(notification_id)
+		{
+			if (confirm("Are you sure you want to delete this notification?"))
+				ajaxNotificationDelete(notification_id, {'onUpdate':reloadNotifcations});
+		}
+
+		function reloadNotifcations()
+		{
+			$(".notifications_datagrid").flexReload();
+		}
+
+		function deleteEvent(event_id)
+		{
+			if (confirm("Are you sure you want to delete this event?"))
+				ajaxEventDelete(event_id, {'onUpdate':reloadEvents});
+		}
+
+		function reloadEvents()
+		{
+			$(".events_datagrid").flexReload();
+		}
+
+	</script>
+
+	<body>
+
+		<div id="ajax"></div>
+
+		<div id="page_wrapper">
+
+			<div id="header_wrapper"></div>
+
+			<div id="content_wrapper">
+
+				<form id="course_form" method="POST" action="course_manage.php">
+
+					<input type="hidden" id="course_id" name="course_id" />
+
+					<div class="form_label float_left">Course name:</div>
+					<div class="form_input float_left">
+						<input type="textbox" id="course_name" name="course_name" class="textbox" />
+						<div id="course_name_desc"><span class="form_input_desc">The course name.</span></div>
+					</div>
+					<div class="clear_both"></div>
+
+					<div class="form_submit">
+						<input id="submit_button" type="button" value="Save Course" onclick="saveCourse();" />
+						<span id="submit_msg" class="submit_msg">Saving... <img src="template/img/ajax/loader.gif" /></span>
+					</div>
+
+					<div class="form_input_divider" style="margin:20px 0px;"></div>
+
+					<h2 style="margin-top:20px;">Notifications</h2>
+					<table class="notifications_datagrid" style="display: none"></table>
+					<div style="margin-top:10px;"><a href="course_notification_manage.php">Add notification</a></div>
+
+					<div class="form_input_divider" style="margin:20px 0px;"></div>
+
+					<h2 style="margin-top:20px;">Events</h2>
+					<table class="events_datagrid" style="display: none"></table>
+					<div style="margin-top:10px;"><a href="calendar.php" id="events_link">Manage events</a></div>
+
+					<div class="form_input_divider" style="margin:20px 0px;"></div>
+
+					<div><a href="courses.php">&laquo; Back</a></div>
+
+				</form>
+
+			</div> <!-- content_wrapper -->
+
+			<div id="footer_wrapper"></div>
+
+		</div> <!-- page_wrapper -->
+
+		<span id="end_script"></span>
+
+		<script>
+
+			$(".notifications_datagrid").flexigrid({
+				url : 'course_notifications_xml.php',
+				dataType: 'xml',
+				colModel : [ {display: 'Title', name: 'title', width: 150, sortable: true, align: 'left'},
+								 {display: 'Start Date', name: 'start_date', width: 150, sortable: true, align: 'left'},
+								 {display: 'End Date', name: 'end_date', width: 150, sortable: true, align: 'left'},
+								 {display: 'Actions', name: 'actions', width: 150, sortable: false, align: 'left'}
+				],
+				searchitems : [ {
+						  display : 'Notification title',
+						  name : 'title',
+						  isdefault : true
+				}],
+				sortname : "start_date",
+				sortorder : "desc",
+				usepager : true,
+				title : 'Notifications',
+				useRp : true,
+				rp : 15,
+				showTableToggleBtn : false,
+				width : 650,
+				height : 300,
+				singleSelect : true
+			});
+
+			$(".events_datagrid").flexigrid({
+				url : 'course_events_xml.php',
+				dataType: 'xml',
+				colModel : [ {display: 'Event', name: 'Subject', width: 150, sortable: true, align: 'left'},
+								 {display: 'Start Time', name: 'StartTime', width: 150, sortable: true, align: 'left'},
+								 {display: 'End Time', name: 'EndTime', width: 150, sortable: true, align: 'left'},
+								 {display: 'Actions', name: 'actions', width: 150, sortable: false, align: 'left'}
+				],
+				searchitems : [ {
+						  display : 'Event',
+						  name : 'Subject',
+						  isdefault : true
+				}],
+				sortname : "StartTime",
+				sortorder : "desc",
+				usepager : true,
+				title : 'Events',
+				useRp : true,
+				rp : 15,
+				showTableToggleBtn : false,
+				width : 650,
+				height : 300,
+				singleSelect : true
+			});
+
+		</script>
+
+	</body>
+
+</html>

@@ -1,0 +1,48 @@
+CREATE TABLE `clearmark_aca`.`notification_rel_subject` (
+`notification_id` INT( 11 ) NOT NULL ,
+`subject_id` INT( 11 ) NOT NULL ,
+INDEX ( `notification_id` , `subject_id` )
+) ENGINE = MYISAM ;
+
+CREATE TABLE `clearmark_aca`.`event_rel_course` (
+`event_id` INT( 11 ) NOT NULL ,
+`course_id` INT( 11 ) NOT NULL ,
+INDEX ( `event_id` , `course_id` )
+) ENGINE = MYISAM ;
+
+CREATE TABLE `clearmark_aca`.`event_rel_subject` (
+`event_id` INT( 11 ) NOT NULL ,
+`subject_id` INT( 11 ) NOT NULL ,
+INDEX ( `event_id` , `subject_id` )
+) ENGINE = MYISAM ;
+
+============
+09-01-2012
+============
+
+ALTER TABLE `log` ADD `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `log_id`;
+
+============
+13-02-2012
+============
+
+ALTER TABLE `conversation` ADD `subject_id` INT( 11 ) NOT NULL AFTER `conversation_id` ,
+ADD INDEX ( subject_id )
+
+============
+14-02-2012
+============
+
+ALTER TABLE `user_profile` ADD `office` VARCHAR( 255 ) NOT NULL AFTER `phone_number`
+
+===========
+14-03-2012
+===========
+
+ALTER TABLE `book_rel_subject` ADD `external_resource` TINYINT( 1 ) NOT NULL DEFAULT '0';
+
+==========
+29-05-2012
+==========
+
+ALTER TABLE `user` ADD `user_id_created` INT( 11 ) NULL DEFAULT '1';
