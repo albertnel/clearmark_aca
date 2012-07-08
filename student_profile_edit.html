@@ -106,7 +106,15 @@
 		function loadContent(type)
 		{
 			ID("content_panel").innerHTML = '<img src="template/img/ajax/loader.gif" /> <span class="text_normal">Loading, please wait...</span>';
-			ajaxCourseLoadContent(type, {'target':'content_panel'});
+			ajaxCourseLoadContent(type, {'target':'content_panel', 'onUpdate':activateLinks});
+		}
+
+		function activateLinks()
+		{
+			$(".fancybox").fancybox({
+				"transitionIn"		: "elastic",
+				"transitionOut"		: "elastic"
+			});
 		}
 
 	</script>
